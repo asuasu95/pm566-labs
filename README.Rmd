@@ -78,7 +78,15 @@ Once you are done setting up the project, you can now start working with the MET
 
 2. Load the met data from https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz, and also the station data. For the later, you can use the code we used during lecture to pre-process the stations data:
 
-```{r stations-data, eval = FALSE}
+```{r}
+library(data.table)
+library(dtplyr)
+library(dplyr)
+met <- fread("C:/Users/s3648/Desktop/xueye/pm566/pm566-week3-lab/met_all.gz")
+```
+
+
+```{r stations-data, eval =TRUE, cache=TRUE}
 # Download the data
 stations <- fread("ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-history.csv")
 stations[, USAF := as.integer(USAF)]
@@ -97,13 +105,38 @@ stations <- stations[n == 1,][, n := NULL]
 
 3. Merge the data as we did during the lecture.
 
+```{r merging}
+
+
+met <- merge(
+  x=met, y= stations, by.x ="USAFID", by.y="USAF",
+  all.x = T, all.y=F
+)
+#PRINT
+met[1:5, .(USAFID,WBAN,STATE)] 
+```
 ## Question 1: Representative station for the US
 
 What is the median station in terms of temperature, wind speed, and atmospheric pressure? Look for the three weather stations that best represent continental US using the `quantile()` function. Do these three coincide?
 
-```{r}
-```
+```{r Q1}
+#obtaining mean
+met_stations =met [,.(
+  wind.sp=mean(wind.sp, na.rm = T),
+  atm.press=mean(atm.press, na.rm = T),
+  temp=mean(temp, na.rm = T)
+), by = USAFID]
 
+#obtaining median
+met_stations[, temp50 := quantile(temp, probs = 0.5, na.rm= T)]
+met_stations[, atmp50 := quantile(atm.press, probs = 0.5, na.rm= T)]
+met_stations[, windsp50 := quantile(wind.sp, probs = 0.5, na.rm= T)]
+#filterring
+met_stations[which.min(abs(temp-temp50))]
+met_stations[which.min(abs(atm.press-atmp50))]
+met_stations[which.min(abs(wind.sp-windsp50))]
+
+```
 
 Knit the document, commit your changes, and Save it on GitHub. Don't forget to add `README.md` to the tree, the first time you render it.
 
@@ -112,6 +145,9 @@ Knit the document, commit your changes, and Save it on GitHub. Don't forget to a
 Just like the previous question, you are asked to identify what is the most representative, the median, station per state. This time, instead of looking at one variable at a time, look at the euclidean distance. If multiple stations show in the median, select the one located at the lowest latitude.
 
 ```{r}
+
+
+
 ```
 
 Knit the doc and save it on GitHub.
