@@ -125,7 +125,7 @@ met_stations =met [,.(
   wind.sp=mean(wind.sp, na.rm = T),
   atm.press=mean(atm.press, na.rm = T),
   temp=mean(temp, na.rm = T)
-), by = USAFID]
+), by = .(USAFID, STATE)]
 
 #obtaining median
 met_stations[, temp50 := quantile(temp, probs = 0.5, na.rm= T)]
@@ -145,11 +145,24 @@ Knit the document, commit your changes, and Save it on GitHub. Don't forget to a
 Just like the previous question, you are asked to identify what is the most representative, the median, station per state. This time, instead of looking at one variable at a time, look at the euclidean distance. If multiple stations show in the median, select the one located at the lowest latitude.
 
 ```{r}
+met_stations[, temp50s := quantile(temp, probs = 0.5, na.rm= T),by =STATE]
+met_stations[, atmp50s:= quantile(atm.press, probs = 0.5, na.rm= T),by =STATE]
+met_stations[, windsp50s := quantile(wind.sp, probs = 0.5, na.rm= T),by =STATE]
 
 
+
+met_stations[, tempdif := which.min(abs(temp-temp50s)),by =STATE]
+met_stations[, recordid := 1:.N,by =STATE]
+met_stations[recordid == tempdif, .(USAFID, temp, temp50s, STATE)]
+
+met_stations[,tempdif := which.min(abs(wind.sp-windsp50s)),by= STATE]
+met_stations[recordid == tempdif, .(USAFID, wind.sp, windsp50s, STATE)]
+
+
+met_stations[, tempdif  := which.min(abs(atm.press - atmp50s)), by=STATE]
+met_stations[recordid == tempdif, .(USAFID, atm.press, atmp50s, STATE)]
 
 ```
-
 Knit the doc and save it on GitHub.
 
 ## Question 3: In the middle?
