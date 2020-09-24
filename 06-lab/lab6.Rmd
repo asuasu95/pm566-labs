@@ -4,9 +4,7 @@ always_allow_html: true
 output: github_document
 ---
 
-```{r setup}
-knitr::opts_chunk$set(eval = FALSE, include  = FALSE)
-```
+
 
 # Learning goals
 
