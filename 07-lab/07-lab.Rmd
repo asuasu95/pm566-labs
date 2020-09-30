@@ -67,13 +67,13 @@ Use the function `httr::GET()` to make the following query:
     - retmax: 1000
 
 
-```{r papers-covid-hawaii, eval=FALSE}
+```{r papers-covid-hawaii}
 library(httr)
 query_ids <- GET(
-  url   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgiL",
+  url   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
   query = list(
  db="pubmed",
-term="covid19 hawaii",
+ term="covid19 hawaii",
  retmax=1000
 )
 )
@@ -99,12 +99,16 @@ following lines of code:
 ```{r get-ids, eval = FALSE}
 # Turn the result into a character vector
 ids <- as.character(ids)
+cat(ids)
+ids
 
 # Find all the ids 
-ids <- stringr::str_extract_all(ids, "PATTERN")[[1]]
+ids <- stringr::str_extract_all(ids, "<Id>[0-9]+</Id>")[[1]]
+
 
 # Remove all the leading and trailing <Id> </Id>. Make use of "|"
-ids <- stringr::str_remove_all(ids, "PATTERN")
+ids <- stringr::str_remove_all(ids, "<Id>|</Id>")
+ids
 ```
 
 With the ids in hand, we can now try to get the abstracts of the papers. As
