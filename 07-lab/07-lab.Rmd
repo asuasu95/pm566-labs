@@ -1,6 +1,7 @@
 ---
 title: "Lab 07 - Web scraping and Regular Expressions"
-output: html_document
+output: github_document
+always_allow_html: true
 ---
 
 ```{r,eval=FALSE}
@@ -99,8 +100,7 @@ following lines of code:
 ```{r get-ids}
 # Turn the result into a character vector
 ids <- as.character(ids)
-cat(ids)
-ids
+
 
 # Find all the ids 
 ids <- stringr::str_extract_all(ids, "<Id>[0-9]+</Id>")[[1]]
@@ -159,7 +159,7 @@ institution <- str_extract_all(
   publications_txt,
   "University of\\s[[:alpha:]]+|[[:alpha:]]+\\sInstitute of\\s[[:alpha:]]+"
   ) 
-institution
+
 institution <- unlist(institution)
 table(institution)
 ```
