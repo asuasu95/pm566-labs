@@ -139,7 +139,7 @@ head(ans1)
 2. Check whether your version actually goes faster than the non-parallel version:
 
 
-```{r benchmark-problem3, eval = FALSE}
+```{r benchmark-problem3}
 system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 1L))
 system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 2L))
 ```

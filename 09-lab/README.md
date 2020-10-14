@@ -51,7 +51,7 @@ microbenchmark::microbenchmark(
 
     ## Unit: relative
     ##       expr      min       lq     mean   median       uq      max neval
-    ##     fun1() 16.32584 23.51354 16.66083 23.73473 22.72149 7.480066   100
+    ##     fun1() 16.47758 23.08059 16.34081 22.63762 21.57923 7.959414   100
     ##  fun1alt()  1.00000  1.00000  1.00000  1.00000  1.00000 1.000000   100
 
 2.  Find the column max (hint: Checkout the function `max.col()`).
@@ -175,8 +175,17 @@ head(ans1)
 
 ``` r
 system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 1L))
+```
+
+    ##    user  system elapsed 
+    ##    0.13    0.02    3.75
+
+``` r
 system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 2L))
 ```
+
+    ##    user  system elapsed 
+    ##    0.14    0.03    2.50
 
 ## Problem 4: Compile this markdown document using Rscript
 
