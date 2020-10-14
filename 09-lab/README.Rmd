@@ -63,10 +63,11 @@ fun2alt <- function(x) {
 }
 
 # Benchmarking
-microbenchmark::microbenchmark(
+ans_benchmark<- microbenchmark::microbenchmark(
   fun2(x),
   fun2alt(x)
 )
+plot(ans_benchmark)
 ```
 
 ## Problem 3: Parallelize everyhing
@@ -81,19 +82,23 @@ observations from our original dataset, which reflects the population.
 
 This function implements the non-parametric bootstrap:
 
-```{r p3-boot-fun, eval = FALSE}
+```{r p3-boot-fun}
+library(parallel)
+
 my_boot <- function(dat, stat, R, ncpus = 1L) {
-  
+
   # Getting the random indices
   n <- nrow(dat)
   idx <- matrix(sample.int(n, n*R, TRUE), nrow=n, ncol=R)
  
   # Making the cluster using `ncpus`
   # STEP 1: GOES HERE
-  # STEP 2: GOES HERE
+  cl=makePSOCKcluster(ncpus)
   
+  # STEP 2: GOES HERE
+  clusterExport(cl,varlist=c("idx","dat","stat"), envir = environment())
     # STEP 3: THIS FUNCTION NEEDS TO BE REPLACES WITH parLapply
-  ans <- lapply(seq_len(R), function(i) {
+  ans <- parLapply(cl,seq_len(R), function(i) {
     stat(dat[idx[,i], , drop=FALSE])
   })
   
@@ -102,15 +107,15 @@ my_boot <- function(dat, stat, R, ncpus = 1L) {
   
   # STEP 4: GOES HERE
   
+  stopCluster(cl)
   ans
-  
 }
 ```
 
 1. Use the previous pseudocode, and make it work with parallel. Here is just an example
 for you to try:
 
-```{r p3-test-boot, eval = FALSE}
+```{r p3-test-boot}
 # Bootstrap of an OLS
 my_stat <- function(d) coef(lm(y ~ x, data=d))
 # DATA SIM
@@ -119,13 +124,13 @@ n <- 500; R <- 1e4
 x <- cbind(rnorm(n)); y <- x*5 + rnorm(n)
 # Checking if we get something similar as lm
 ans0 <- confint(lm(y~x))
-ans1 <- my_boot(dat = data.frame(x, y), mi_stat, R = R, ncpus = 2L)
+ans1 <- my_boot(dat = data.frame(x, y), my_stat, R = R, ncpus = 2L)
 # You should get something like this
 t(apply(ans1, 2, quantile, c(.025,.975)))
 ##                   2.5%      97.5%
 ## (Intercept) -0.1372435 0.05074397
 ## x            4.8680977 5.04539763
-ans0
+head(ans1)
 ##                  2.5 %     97.5 %
 ## (Intercept) -0.1379033 0.04797344
 ## x            4.8650100 5.04883353
@@ -135,8 +140,8 @@ ans0
 
 
 ```{r benchmark-problem3, eval = FALSE}
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 4000, ncpus = 1L))
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 4000, ncpus = 2L))
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 1L))
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 2L))
 ```
 
 ## Problem 4: Compile this markdown document using Rscript

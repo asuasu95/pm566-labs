@@ -51,7 +51,7 @@ microbenchmark::microbenchmark(
 
     ## Unit: relative
     ##       expr      min       lq     mean   median       uq      max neval
-    ##     fun1() 16.42947 21.42436 15.59202 21.28283 18.26787 8.089971   100
+    ##     fun1() 16.32584 23.51354 16.66083 23.73473 22.72149 7.480066   100
     ##  fun1alt()  1.00000  1.00000  1.00000  1.00000  1.00000 1.000000   100
 
 2.  Find the column max (hint: Checkout the function `max.col()`).
@@ -71,16 +71,14 @@ fun2alt <- function(x) {
 }
 
 # Benchmarking
-microbenchmark::microbenchmark(
+ans_benchmark<- microbenchmark::microbenchmark(
   fun2(x),
   fun2alt(x)
 )
+plot(ans_benchmark)
 ```
 
-    ## Unit: microseconds
-    ##        expr      min       lq     mean    median       uq    max neval
-    ##     fun2(x) 1061.302 1143.452 1390.586 1237.3510 1423.351 3589.5   100
-    ##  fun2alt(x)  100.602  109.101  157.230  119.8515  144.651 2535.3   100
+![](README_files/figure-gfm/p2-fun2-1.png)<!-- -->
 
 ## Problem 3: Parallelize everyhing
 
@@ -97,18 +95,22 @@ population.
 This function implements the non-parametric bootstrap:
 
 ``` r
+library(parallel)
+
 my_boot <- function(dat, stat, R, ncpus = 1L) {
-  
+
   # Getting the random indices
   n <- nrow(dat)
   idx <- matrix(sample.int(n, n*R, TRUE), nrow=n, ncol=R)
  
   # Making the cluster using `ncpus`
   # STEP 1: GOES HERE
-  # STEP 2: GOES HERE
+  cl=makePSOCKcluster(ncpus)
   
+  # STEP 2: GOES HERE
+  clusterExport(cl,varlist=c("idx","dat","stat"), envir = environment())
     # STEP 3: THIS FUNCTION NEEDS TO BE REPLACES WITH parLapply
-  ans <- lapply(seq_len(R), function(i) {
+  ans <- parLapply(cl,seq_len(R), function(i) {
     stat(dat[idx[,i], , drop=FALSE])
   })
   
@@ -117,8 +119,8 @@ my_boot <- function(dat, stat, R, ncpus = 1L) {
   
   # STEP 4: GOES HERE
   
+  stopCluster(cl)
   ans
-  
 }
 ```
 
@@ -136,13 +138,31 @@ n <- 500; R <- 1e4
 x <- cbind(rnorm(n)); y <- x*5 + rnorm(n)
 # Checking if we get something similar as lm
 ans0 <- confint(lm(y~x))
-ans1 <- my_boot(dat = data.frame(x, y), mi_stat, R = R, ncpus = 2L)
+ans1 <- my_boot(dat = data.frame(x, y), my_stat, R = R, ncpus = 2L)
 # You should get something like this
 t(apply(ans1, 2, quantile, c(.025,.975)))
+```
+
+    ##                   2.5%      97.5%
+    ## (Intercept) -0.1386903 0.04856752
+    ## x            4.8685162 5.04351239
+
+``` r
 ##                   2.5%      97.5%
 ## (Intercept) -0.1372435 0.05074397
 ## x            4.8680977 5.04539763
-ans0
+head(ans1)
+```
+
+    ##      (Intercept)        x
+    ## [1,] -0.05842282 4.962805
+    ## [2,] -0.03370728 4.887988
+    ## [3,]  0.01139792 4.917869
+    ## [4,] -0.04712516 5.026042
+    ## [5,] -0.04951412 4.956055
+    ## [6,] -0.03079149 4.904128
+
+``` r
 ##                  2.5 %     97.5 %
 ## (Intercept) -0.1379033 0.04797344
 ## x            4.8650100 5.04883353
@@ -154,8 +174,8 @@ ans0
 <!-- end list -->
 
 ``` r
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 4000, ncpus = 1L))
-system.time(my_boot(dat = data.frame(x, y), mi_stat, R = 4000, ncpus = 2L))
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 1L))
+system.time(my_boot(dat = data.frame(x, y), my_stat, R = 4000, ncpus = 2L))
 ```
 
 ## Problem 4: Compile this markdown document using Rscript
