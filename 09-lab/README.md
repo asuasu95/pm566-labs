@@ -50,9 +50,9 @@ microbenchmark::microbenchmark(
 ```
 
     ## Unit: relative
-    ##       expr      min       lq     mean   median      uq      max neval
-    ##     fun1() 16.57304 23.40467 16.88699 22.97725 18.2678 10.38327   100
-    ##  fun1alt()  1.00000  1.00000  1.00000  1.00000  1.0000  1.00000   100
+    ##       expr      min       lq     mean   median       uq      max neval
+    ##     fun1() 16.42947 21.42436 15.59202 21.28283 18.26787 8.089971   100
+    ##  fun1alt()  1.00000  1.00000  1.00000  1.00000  1.00000 1.000000   100
 
 2.  Find the column max (hint: Checkout the function `max.col()`).
 
@@ -67,14 +67,20 @@ fun2 <- function(x) {
   apply(x, 2, max)
 }
 fun2alt <- function(x) {
-  # YOUR CODE HERE
+  x[cbind(max.col(t(x)),1:ncol(x))]
 }
+
 # Benchmarking
 microbenchmark::microbenchmark(
-  fun2(),
-  fun2alt()
+  fun2(x),
+  fun2alt(x)
 )
 ```
+
+    ## Unit: microseconds
+    ##        expr      min       lq     mean    median       uq    max neval
+    ##     fun2(x) 1061.302 1143.452 1390.586 1237.3510 1423.351 3589.5   100
+    ##  fun2alt(x)  100.602  109.101  157.230  119.8515  144.651 2535.3   100
 
 ## Problem 3: Parallelize everyhing
 
