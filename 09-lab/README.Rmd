@@ -2,7 +2,8 @@
 title: "09-lab"
 author: "Changqing Su"
 date: "2020/10/14"
-output: html_document
+output: github_document
+always_allow_html: true
 ---
 
 # Learning goals
@@ -28,19 +29,22 @@ parallel:
 1. This function generates a `n x k` dataset with all its entries distributed
 poission with mean `lambda`.
 
-```{r p2-fun1, eval = FALSE}
+```{r p2-fun1}
+library(microbenchmark)
 fun1 <- function(n = 100, k = 4, lambda = 4) {
   x <- NULL
   for (i in 1:n)
     x <- rbind(x, rpois(k, lambda))
+  x
 }
 fun1alt <- function(n = 100, k = 4, lambda = 4) {
-  # YOUR CODE HERE
+ matrix(rpois(n*k,lambda=lambda),ncol = k)
+  
 }
 # Benchmarking
 microbenchmark::microbenchmark(
   fun1(),
-  fun1alt()
+  fun1alt(), unit= "relative"
 )
 ```
 
