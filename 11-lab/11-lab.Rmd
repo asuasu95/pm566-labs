@@ -122,6 +122,10 @@ min(cv_states$date)
 max(cv_states$date)
 ```
 
+Date range is from 2020-01-21 to 2020-10-27.
+Range of cases is from 1 to 923828.
+Range of deaths is from 0 to 33092.
+
 ### 4. Add `new_cases` and `new_deaths` and correct outliers
 
 - Add variables for new cases, `new_cases`, and new deaths, `new_deaths`: 
@@ -221,6 +225,7 @@ cv_states_today = cv_states %>% filter(date == as.Date(max_date))
 
 ```
 
+
 ## II. Interactive plots
 
 ### 6. Explore scatterplots using `plot_ly()`
@@ -283,6 +288,7 @@ p <- ggplot(cv_states_today_scatter, aes(x=pop_density, y=deathsper100k, size=po
 ggplotly(p)
 ```
 
+According to the plot, pop_density seems to be correlated with newdeathsper100k with a positive slope.
 
 ### 8. Multiple line chart
 
@@ -304,6 +310,9 @@ cv_states %>% filter(state=="Texas") %>% plot_ly(x = ~date, y = ~new_cases, type
 
 ```
 
+The peak for cases is on Sep 21th.
+The peak for deaths is on July 27th.
+56 days in between
 
 ### 9. Heatmaps
 
@@ -416,7 +425,7 @@ fig <- plot_geo(cv_CFR, locationmode = 'USA-states') %>%
     z = ~naive_CFR, text = ~hover, locations = ~state,
     color = ~naive_CFR, colors = 'Purples'
   )
-fig <- fig %>% colorbar(title = "CFR May 1 2020", cols = c(0,shadeLimit))
+fig <- fig %>% colorbar(title = "CFR Today", cols = c(0,shadeLimit))
 fig <- fig %>% layout(
     title = paste('CFR by State as of', Sys.Date(), '<br>(Hover for value)'),
     geo = set_map_details
@@ -430,5 +439,5 @@ subplot(fig_May1,fig_Today)
 
 ```
 
-
+The case case fatality rate increased in New York and decreased in other states. It may due to large amount of cases but limited medical resources in New York. 
 
